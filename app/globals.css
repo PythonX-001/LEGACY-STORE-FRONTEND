@@ -18,11 +18,11 @@ nav a:hover,.cartbtn:hover{color:var(--fg)}
 .cartbtn b{display:inline-grid;place-items:center;min-width:20px;height:20px;margin-left:6px;border:1px solid var(--acc);border-radius:20px;color:var(--acc);font-weight:500;font-size:11px}
 main{position:relative;z-index:5}
 section{min-height:100vh;padding:120px 5vw 80px;display:flex;flex-direction:column;justify-content:center}
-.hero{align-items:flex-start}
+.hero{position:relative;align-items:flex-start;min-height:100vh;min-height:100svh}
 .kick{font-size:12px;letter-spacing:.4em;color:var(--acc);text-transform:uppercase}
 h1{font:400 clamp(34px,7.4vw,104px)/1.05 var(--d);letter-spacing:.06em;margin:.3em 0;max-width:12ch}
 .sub{max-width:44ch;color:var(--mute);font-size:18px}
-.btn{display:inline-block;margin-top:32px;padding:16px 34px;border:1px solid var(--fg);color:var(--fg);text-decoration:none;font-size:13px;letter-spacing:.24em;text-transform:uppercase;background:transparent;cursor:pointer;font-family:var(--b);transition:.25s}
+.btn{display:inline-block;margin-top:32px;padding:16px 34px;border:1px solid var(--fg);color:var(--fg);text-decoration:none;font-size:13px;letter-spacing:.24em;text-transform:uppercase;background:transparent;cursor:pointer;font-family:var(--b);transition:background .25s,color .25s}
 .btn:hover{background:var(--fg);color:var(--bg)}
 .scrollhint{position:absolute;bottom:32px;left:5vw;font-size:11px;letter-spacing:.3em;color:var(--mute);text-transform:uppercase}
 .manifesto p{font:400 clamp(22px,3.6vw,48px)/1.35 var(--d);max-width:20ch;margin:0 0 0 auto;text-align:right}
@@ -68,7 +68,9 @@ footer{padding:40px 5vw 60px;border-top:1px solid var(--line);color:var(--mute);
 #toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 24px);transform:translate(-50%,20px);z-index:70;background:var(--fg);color:var(--bg);padding:12px 20px;font-size:13px;opacity:0;transition:.3s;pointer-events:none;max-width:90vw}
 #toast.on{opacity:1;transform:translate(-50%,0)}
 button:focus-visible,a:focus-visible{outline:2px solid var(--acc);outline-offset:3px}
-@media(max-width:720px){nav a{display:none}.manifesto p{text-align:left;margin:0}section{padding-top:100px}}
+@media(max-width:720px){nav a{display:none}.manifesto p{text-align:left;margin:0}section{padding-top:100px}
+/* phones: start the hero near the top so the button is always above the fold (100vh includes the browser toolbars) */
+.hero{justify-content:flex-start;padding-top:max(110px,16svh);padding-bottom:110px}.hero .btn{margin-top:28px}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{transition:none!important}}
 
 .logo img{height:34px;width:auto;display:block}
