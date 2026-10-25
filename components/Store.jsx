@@ -6,9 +6,20 @@ const COL={obsidian:'#1b1d24',ash:'#8a8e98',bone:'#e6e1d6'};
 const SIL={tee:'M60 30L85 20Q100 34 115 20L140 30L182 64L160 94L140 82V200H60V82L40 94L18 64Z',
 top:'M60 30L85 20Q100 34 115 20L140 30L188 150L166 160L140 92V200H60V92L34 160L12 150Z',
 hoodie:'M58 46L84 36Q100 52 116 36L142 46L186 132L164 144L142 114V205H58V114L36 144L14 132ZM76 40Q100 -6 124 40Q100 66 76 40Z'};
-const STAR='M100 78Q103 92 118 96Q103 100 100 116Q97 100 82 96Q97 92 100 78Z';
+const STAR='M99.6 76.0C100.1 80.0 100.2 84.9 103.0 88.2C104.3 89.8 106.2 90.8 108.0 91.8C106.6 92.1 104.6 91.4 103.3 92.5C101.9 93.8 102.0 97.8 101.7 99.6C100.9 106.4 100.7 113.2 100.1 120.0C99.8 117.5 99.9 114.9 99.8 112.3C99.6 108.5 99.4 104.7 99.1 100.8C98.9 98.0 98.8 95.0 97.8 92.4C96.8 89.7 94.5 87.5 92.0 86.2C93.2 86.3 94.3 86.8 95.5 86.7C100.8 86.4 98.9 79.4 99.6 76.0ZM99.9 83.6C99.8 84.7 100.0 87.4 98.8 88.0C98.2 88.3 97.5 88.0 96.9 88.1C99.3 89.6 99.5 92.0 99.7 94.6C99.9 97.1 99.9 99.6 100.1 102.0C100.6 99.4 100.6 96.6 100.9 93.9C101.0 93.0 100.9 91.4 101.6 90.7C102.1 90.3 103.0 90.4 103.6 90.4C102.9 89.9 102.1 89.5 101.5 88.9C100.2 87.5 100.1 85.4 99.9 83.6Z';
 const money=c=>new Intl.NumberFormat('en-US',{style:'currency',currency:'USD'}).format(c/100);
-const Art=({t,col})=><svg viewBox="0 -10 200 230" aria-hidden="true"><path d={SIL[t]} fill={COL[col]} stroke="rgba(255,255,255,.28)" strokeWidth="1.4" fillRule="evenodd"/>{t==='hoodie'&&<path d="M72 150H128L136 184H64Z" fill="none" stroke="rgba(255,255,255,.18)"/>}<path d={STAR} fill={col==='bone'?'#111':'#e9ecf2'}/></svg>;
+const Art=({t,col})=><svg viewBox="0 -10 200 230" aria-hidden="true"><path d={SIL[t]} fill={COL[col]} stroke="rgba(255,255,255,.28)" strokeWidth="1.4" fillRule="evenodd"/>{t==='hoodie'&&<path d="M72 150H128L136 184H64Z" fill="none" stroke="rgba(255,255,255,.18)"/>}<path d={STAR} fillRule="evenodd" fill={col==='bone'?'#111':'#e9ecf2'}/></svg>;
+// Product photos (uploaded in /admin) when a product has them, otherwise the drawn silhouette.
+const Gallery=({p,col})=>{
+ const im=p.images||[],n=im.length,[i,setI]=useState(0),[x0,setX0]=useState(null);
+ if(!n)return <div className="art"><Art t={p.t} col={col}/></div>;
+ const at=Math.min(i,n-1),go=d=>setI((at+d+n)%n);
+ return <div className="art photo" onTouchStart={e=>setX0(e.touches[0].clientX)} onTouchEnd={e=>{if(x0!==null&&n>1){const dx=e.changedTouches[0].clientX-x0;if(Math.abs(dx)>40)go(dx<0?1:-1)}setX0(null)}}>
+  <img src={im[at]} alt={`${p.name} photo ${at+1}`} loading="lazy" decoding="async" draggable="false"/>
+  {n>1&&<><button className="gn gp" aria-label="Previous photo" onClick={()=>go(-1)}>‹</button><button className="gn gx" aria-label="Next photo" onClick={()=>go(1)}>›</button>
+   <div className="dots">{im.map((_,k)=><button key={k} aria-label={`Photo ${k+1}`} aria-pressed={k===at} onClick={()=>setI(k)}/>)}</div></>}
+ </div>};
+const Thumb=({p,col})=>p.images?.length?<img className="ln-img" src={p.images[0]} alt=""/>:<Art t={p.t} col={col}/>;
 export default function Store({products}){
  const [filter,setFilter]=useState('All'),[sel,setSel]=useState({}),[cart,setCart]=useState([]),[open,setOpen]=useState(false),[msg,setMsg]=useState(''),[busy,setBusy]=useState(false),[ready,setReady]=useState(false),[form,setForm]=useState({name:'',phone:'',address:'',note:''});
  const byId=useMemo(()=>Object.fromEntries(products.map(p=>[p.id,p])),[products]);
@@ -41,7 +52,7 @@ export default function Store({products}){
  <Intro ready={ready} onOutro={()=>window.dispatchEvent(new Event('legacy:reveal'))}/>
  <canvas id="gl" aria-hidden="true"/><div className="vig"/><div className="grain"/>
  <header>
-  <a className="logo" href="#top" aria-label="LEGACY home"><img src="/logo.svg" alt="LEGACY"/></a>
+  <a className="logo" href="#top" aria-label="LEGACY home"><img src="/logo-wordmark.svg" alt="LEGACY"/></a>
   <nav><a href="#shop">Collection</a><a href="#about">Craft</a><button className="cartbtn" onClick={()=>setOpen(true)} aria-label="Open cart">Cart<b>{lines.reduce((a,l)=>a+l.q,0)}</b></button></nav>
  </header>
  <main>
@@ -58,7 +69,7 @@ export default function Store({products}){
    <div className="chips">{['All','Hoodies','T-shirts','Tops'].map(f=><button key={f} className="chip" aria-pressed={f===filter} onClick={()=>setFilter(f)}>{f}</button>)}</div>
    <div id="grid">{shown.map(p=>{const s=get(p),stock=p.sizes[s.s]??0;return(
     <article className="card" key={p.id}>
-     <div className="art"><Art t={p.t} col={s.c}/></div>
+     <Gallery p={p} col={s.c}/>
      <div className="row"><span className="name">{p.name}</span><span className="price">{money(p.price)}</span></div>
      <div className="row"><span style={{display:'flex',gap:8}}>{p.colors.map(c=><button key={c} className="sw" aria-label={c} aria-pressed={c===s.c} style={{background:COL[c]}} onClick={()=>pick(p,{c})}/>)}</span><span className="mini">{s.c}</span></div>
      <div className="row" style={{justifyContent:'flex-start',gap:8,flexWrap:'wrap'}}>{Object.keys(p.sizes).map(z=><button key={z} className="sz" disabled={p.sizes[z]<1} aria-pressed={z===s.s} onClick={()=>pick(p,{s:z})}>{z}</button>)}</div>
@@ -81,7 +92,7 @@ export default function Store({products}){
  <div id="scrim" className={open?'on':''} onClick={()=>setOpen(false)}/>
  <aside id="drawer" className={open?'open':''} aria-label="Cart" aria-hidden={!open}>
   <div className="dh"><div className="name">YOUR CART</div><button className="x" onClick={()=>setOpen(false)} aria-label="Close cart">×</button></div>
-  <div id="lines">{lines.length?lines.map(l=><div className="ln" key={l.k}><Art t={l.p.t} col={l.c}/><div><div className="name">{l.p.name}</div><div className="mini">{l.c} · {l.s}</div><div className="qty"><button onClick={()=>qty(l,-1)} aria-label="Decrease">−</button>{l.q}<button onClick={()=>qty(l,1)} aria-label="Increase">+</button></div></div><b>{money(l.p.price*l.q)}</b></div>):<div className="empty">Your cart is empty.</div>}</div>
+  <div id="lines">{lines.length?lines.map(l=><div className="ln" key={l.k}><Thumb p={l.p} col={l.c}/><div><div className="name">{l.p.name}</div><div className="mini">{l.c} · {l.s}</div><div className="qty"><button onClick={()=>qty(l,-1)} aria-label="Decrease">−</button>{l.q}<button onClick={()=>qty(l,1)} aria-label="Increase">+</button></div></div><b>{money(l.p.price*l.q)}</b></div>):<div className="empty">Your cart is empty.</div>}</div>
   <div className="tot"><span>Subtotal</span><b>{money(lines.reduce((a,l)=>a+l.p.price*l.q,0))}</b></div>
   <div className="mini">Shipping is confirmed with you on WhatsApp.</div>
   {lines.length>0&&<form className="f" onSubmit={order}>
